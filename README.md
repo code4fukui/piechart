@@ -8,14 +8,14 @@
 import { showPieChart } from "https://code4fukui.github.io/piechart/showPieChart.js";
 
 onload = async () => {
-	const data = {
-			A: 300,
-			B: 100,
-			C: 50,
-			D: 3,
-	};
-	const unit = "人";
-	showPieChart(canvas, tbl, data, unit);
+  const data = {
+		A: 300,
+		B: 100,
+		C: 50,
+		D: 3,
+  };
+  const unit = "人";
+  showPieChart(canvas, tbl, data, unit);
 };
 </script>
 ```
