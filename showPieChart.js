@@ -157,7 +157,7 @@ export const showGraph = (c, data, unit) => {
       let th = -Math.PI / 2;
       for (let i = 0; i < d.length; i++) {
         const dth = d[i][1] / sum * max;
-        const col = i == d.length - 1 ? gray : hsl2rgb(starthue + 320 / d.length * i, s, v);
+        const col = i == d.length - 1 && i != 0 ? gray : hsl2rgb(starthue + 320 / d.length * i, s, v);
         g.beginPath();
         g.setColor(col[0], col[1], col[2]);
         g.moveTo(cx, cy);
