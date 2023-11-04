@@ -5,44 +5,6 @@ import { Num } from "https://js.sabae.cc/Num.js";
 const create = (tag) => document.createElement(tag);
 const clear = (ele) => ele.innerHTML = "";
 
-export const showTable = function(div, data, unit = "") {
-  clear(div);
-  const d = [];
-  let sum = 0;
-  for (const n in data) {
-    d.push([ n, data[n] ]);
-    sum += data[n];
-  }
-  d.sort(function(a, b) {
-    if (a[1] < b[1])
-      return 1;
-    if (a[1] == b[1])
-      return 0;
-    return -1;
-  });
-  
-  d.push(["合計", sum]);
-  const tbl = create("table");
-  for (let i = 0; i < d.length; i++) {
-    const tr = create("tr");
-    let td = create("td");
-    const s = d[i][0];
-    if (s.startsWith("http://") || s.startsWith("https://")) {
-      td.innerHTML = "<a href=" + s + " target=_blank>" + s + "</a>";
-    } else {
-      td.textContent = s;
-    }
-    tr.appendChild(td);
-    td = create("td");
-    td.textContent = Num.addComma(d[i][1]) + unit;
-    tr.appendChild(td);
-    td = create("td");
-    td.textContent = (d[i][1] / sum * 100).toFixed(1) + "%";
-    tr.appendChild(td);
-    tbl.appendChild(tr);
-  }
-  div.appendChild(tbl);
-};
 const omitData = (data) => {
   let sum = 0;
   for (const n in data) {
@@ -67,6 +29,62 @@ const omitData = (data) => {
   }
   return data2;
 };
+
+const sortWithEtc = (a, b) => {
+  if (a[0] == "その他")
+    return 1;
+  if (b[0] == "その他")
+    return -1;
+  if (a[1] < b[1])
+    return 1;
+  if (a[1] == b[1])
+    return 0;
+  return -1;
+};
+
+const showNum = (n, unit) => {
+  if (unit.startsWith("百万")) {
+    return Num.fixbig(n, true) + unit.substring(2);
+  } else {
+    return Num.addComma(n) + unit
+  }
+};
+
+export const showTable = function(div, data, unit = "") {
+  data = omitData(data);
+
+  clear(div);
+  const d = [];
+  let sum = 0;
+  for (const n in data) {
+    d.push([ n, data[n] ]);
+    sum += data[n];
+  }
+  d.sort(sortWithEtc);
+
+  d.push(["合計", sum]);
+  const tbl = create("table");
+  for (let i = 0; i < d.length; i++) {
+    const tr = create("tr");
+    let td = create("td");
+    const s = d[i][0];
+    if (s.startsWith("http://") || s.startsWith("https://")) {
+      td.innerHTML = "<a href=" + s + " target=_blank>" + s + "</a>";
+    } else {
+      td.textContent = s;
+    }
+    tr.appendChild(td);
+    td = create("td");
+    td.textContent = showNum(d[i][1], unit);
+    tr.appendChild(td);
+    td = create("td");
+    td.textContent = (d[i][1] / sum * 100).toFixed(1) + "%";
+    tr.appendChild(td);
+    tbl.appendChild(tr);
+  }
+  div.appendChild(tbl);
+};
+
 export const showGraph = (c, data, unit) => {
   data = omitData(data);
   const g = c.getContext("2d");
@@ -95,17 +113,7 @@ export const showGraph = (c, data, unit) => {
   }
 //  alert(sum);
   
-  d.sort(function(a, b) {
-    if (a[0] == "その他")
-      return 1;
-    if (b[0] == "その他")
-      return -1;
-    if (a[1] < b[1])
-      return 1;
-    if (a[1] == b[1])
-      return 0;
-    return -1;
-  });
+  d.sort(sortWithEtc);
 //  dump(d);
   g.setFont = function(sh) {
     this.font = "normal " + sh + "px sans-serif";
@@ -118,7 +126,7 @@ export const showGraph = (c, data, unit) => {
   let timer = null;
   
   const animationtype = 1;
-  const tcnt = 60;
+  const tcnt = 30;
 
   const animation = (t, type) => {
     switch (type) {
@@ -141,13 +149,15 @@ export const showGraph = (c, data, unit) => {
     const cy = g.ch / 2;
     const r = Math.min(g.cw, g.ch) / 2 * .95;
     
+    const starthue = 0; // 90
+    const gray = [230, 230, 230];
     const max = Math.PI * 2 * animation(t / tcnt, animationtype);
     const f = function(dx, dy, s, v) {
       g.translate(dx, dy);
       let th = -Math.PI / 2;
       for (let i = 0; i < d.length; i++) {
         const dth = d[i][1] / sum * max;
-        const col = hsl2rgb(90 + 320 / d.length * i, s, v);
+        const col = i == d.length - 1 ? gray : hsl2rgb(starthue + 320 / d.length * i, s, v);
         g.beginPath();
         g.setColor(col[0], col[1], col[2]);
         g.moveTo(cx, cy);
@@ -159,7 +169,7 @@ export const showGraph = (c, data, unit) => {
       }
       g.translate(-dx, -dy);
     };
-    f(8, 8, .4, .8);
+    f(8, 8, .7, .7);
     //f(0, 0, .4, 1);
 
     const fh = g.ch / 30;
@@ -172,12 +182,12 @@ export const showGraph = (c, data, unit) => {
       const x = cx + Math.cos(th + dth / 2) * r * .7;
       const y = cy + Math.sin(th + dth / 2) * r * .7;
       g.fillTextCenter(d[i][0], x, y - fh / 6);
-      g.fillTextCenter(Num.addComma(d[i][1]) + unit, x, y + fh + fh / 6);
+      g.fillTextCenter(showNum(d[i][1], unit), x, y + fh + fh / 6);
       g.fillTextCenter((d[i][1] / sum * 100).toFixed(1) + "%", x, y + fh * 2 + fh / 6);
       th += dth;
     }
     g.fillTextCenter("総数", cx, cy - fh / 6);
-    g.fillTextCenter(Num.addComma(sum) + unit, cx, cy + fh + fh / 6);
+    g.fillTextCenter(showNum(sum, unit), cx, cy + fh + fh / 6);
     if (t >= tcnt) {
       clearInterval(timer);
     }
