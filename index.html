@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" href="data:">
+<title>円グラフサンプル</title>
+</head>
+<body>
+
+<h1>円グラフサンプル</h1>
+
+<canvas id="canvas"></canvas>
+<div id="tbl"></div>
+
+<script type="module">
+import { showPieChart } from "./showPieChart.js";
+
+onload = async () => {
+	const data = {
+			A: 300,
+			B: 100,
+			C: 50,
+			D: 3,
+	};
+	const unit = "人";
+	showPieChart(canvas, tbl, data, unit);
+};
+</script>
+
+<div id="credit">
+APP: <a href="https://github.com/code4fukui/piechart/">src on GitHub</a><br>
+</div>
+
+<style>
+body {
+	text-align: center;
+}
+#canvas {
+	display: inline-block;
+	width: 400px;
+	height: 400px;
+}
+#tbl table {
+	border-collapse: collapse;
+	margin: 1em;
+	display: inline-block;
+	text-align: right;
+}
+#tbl td {
+	font-size: 70%;
+	border: 1px solid #444;
+	padding: 2px;
+	x-white-space: nowrap;
+	word-break: break-all;
+}
+#tbl table td:first-child {
+	text-align: left;
+}
+@media screen and (min-width: 440px) {
+}
+</style>
+
+</body>
+</html>
