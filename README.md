@@ -1,5 +1,7 @@
 # piechart
 
+- [edittable live demo](https://ss.sabae.cc/#1065)
+
 ```html
 <canvas id="canvas"></canvas>
 <div id="tbl"></div>
